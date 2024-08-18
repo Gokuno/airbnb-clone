@@ -7,3 +7,24 @@ body,
 :root {
     height: 100%;
 }
+
+.leaflet-bottom,
+.leaflet-control,
+.leaflet-pane,
+.leaflet-top {
+    z-index: 0 !important;
+}
+
+#map {
+    height: 100vh;
+  }
+  
+  .leaflet-container {
+    height: 500px;
+    width: 100%;
+  }
+  
+  .leaflet-div-icon {
+    background: transparent;
+    border: none;
+  }
