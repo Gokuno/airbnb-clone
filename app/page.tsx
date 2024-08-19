@@ -16,8 +16,9 @@ export default async function Home() {
   }
   return (
     <Container>
-      <div 
+      <div
         className="
+          mt-5
           pt-24
           grid
           grid-cols-1
@@ -29,16 +30,16 @@ export default async function Home() {
           gap-8
         "
       >
-        {listings.map((listing: any) => {
+        {listings.map((listing) => {
           return (
-            <ListingCard 
+            <ListingCard
               currentUser={currentUser}
               key={listing.id}
               data={listing}
             />
           )
         })}
-        
+
       </div>
     </Container>
   );

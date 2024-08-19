@@ -3,67 +3,67 @@
 import { useRouter } from "next/navigation";
 import { Listing, Reservation } from "@prisma/client";
 
-import { SafeUser } from "@/app/types";
+import { SafeListing, SafeUser } from "@/app/types";
 import useCountries from "../hooks/useCountries";
 import { useCallback, useMemo } from "react";
-import { format } from "date-fns"; 
+import { format } from "date-fns";
 import Image from "next/image";
 import HeartButton from "../HeartButton";
 import Button from "../Button";
 
 interface ListingCardProps {
-    data: Listing;
-    reservation?: Reservation;
-    onAction?: (id: string) => void;
-    disabled?: boolean;
-    actionLabel?: string;
-    actionId?: string;
-    currentUser?: SafeUser | null; 
+  data: SafeListing;
+  reservation?: Reservation;
+  onAction?: (id: string) => void;
+  disabled?: boolean;
+  actionLabel?: string;
+  actionId?: string;
+  currentUser?: SafeUser | null;
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({
-    data,
-    reservation,
-    onAction,
-    disabled,
-    actionLabel,
-    actionId = "",
-    currentUser
+  data,
+  reservation,
+  onAction,
+  disabled,
+  actionLabel,
+  actionId = "",
+  currentUser
 }) => {
-    const router = useRouter();
-    const { getByValue } = useCountries();
+  const router = useRouter();
+  const { getByValue } = useCountries();
 
-    const location = getByValue(data.locationValue);
+  const location = getByValue(data.locationValue);
 
-    const handleCancel = useCallback(
-        (e: React.MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
+  const handleCancel = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
 
-            if (disabled) {
-                return;
-            }
-
-            onAction?.(actionId);
-        }, [onAction, actionId, disabled]);
-
-    const price = useMemo(() => {
-      if (reservation) {
-        return reservation.totalPrice;
+      if (disabled) {
+        return;
       }
 
-      return data.price;
-    }, [reservation, data.price]);
+      onAction?.(actionId);
+    }, [onAction, actionId, disabled]);
 
-    const reservationDate = useMemo(() => {
-      if (!reservation) {
-        return null;
-      }
+  const price = useMemo(() => {
+    if (reservation) {
+      return reservation.totalPrice;
+    }
 
-      const start = new Date(reservation.startDate);
-      const end = new Date(reservation.endDate);
+    return data.price;
+  }, [reservation, data.price]);
 
-      return `${format(start, 'PP')} - ${format(end, 'PP')}`
-    }, [reservation]);
+  const reservationDate = useMemo(() => {
+    if (!reservation) {
+      return null;
+    }
+
+    const start = new Date(reservation.startDate);
+    const end = new Date(reservation.endDate);
+
+    return `${format(start, 'PP')} - ${format(end, 'PP')}`
+  }, [reservation]);
 
   return (
     <div
@@ -82,7 +82,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
             rounded-xl
           "
         >
-          <Image 
+          <Image
             fill
             alt="Listing"
             src={data.imageSrc}
@@ -119,7 +119,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           )}
         </div>
         {onAction && actionLabel && (
-          <Button 
+          <Button
             disabled={disabled}
             small
             label={actionLabel}
