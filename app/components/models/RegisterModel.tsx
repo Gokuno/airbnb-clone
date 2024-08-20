@@ -5,9 +5,9 @@ import { AiFillGithub } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import { useCallback, useState } from "react";
 import {
-    FieldValues,
-    SubmitHandler,
-    useForm
+  FieldValues,
+  SubmitHandler,
+  useForm
 } from 'react-hook-form';
 
 import useRegisterModel from "../hooks/useRegisterModel";
@@ -31,13 +31,13 @@ const RegisterModel = () => {
     register,
     handleSubmit,
     formState: {
-        errors,
+      errors,
     }
-  } =useForm<FieldValues>({
+  } = useForm<FieldValues>({
     defaultValues: {
-        name: '',
-        email: '',
-        password: ''
+      name: '',
+      email: '',
+      password: ''
     }
   });
 
@@ -48,6 +48,7 @@ const RegisterModel = () => {
       .then(() => {
         toast.success('Success! You can now log in to your account');
         registerModel.onClose();
+        loginModel.onOpen();
       })
       .catch((error) => {
         toast.error('Something went wrong.');
@@ -64,54 +65,54 @@ const RegisterModel = () => {
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
-        <Heading 
-          title="Welcome to Airbnb"
-          subtitle="Create your account"
-        />
-        <Inputs 
-          id='email'
-          label="Email"
-          disabled={isLoading}
-          register={register}
-          errors={errors}
-          required
-        />
-        <Inputs 
-          id='name'
-          label="Name"
-          disabled={isLoading}
-          register={register}
-          errors={errors}
-          required
-        />
-        <Inputs 
-          id='password'
-          type="password"
-          label="Password"
-          disabled={isLoading}
-          register={register}
-          errors={errors}
-          required
-        />
+      <Heading
+        title="Welcome to Airbnb"
+        subtitle="Create your account"
+      />
+      <Inputs
+        id='email'
+        label="Email"
+        disabled={isLoading}
+        register={register}
+        errors={errors}
+        required
+      />
+      <Inputs
+        id='name'
+        label="Name"
+        disabled={isLoading}
+        register={register}
+        errors={errors}
+        required
+      />
+      <Inputs
+        id='password'
+        type="password"
+        label="Password"
+        disabled={isLoading}
+        register={register}
+        errors={errors}
+        required
+      />
     </div>
   );
 
   const footerContent = (
     <div className="flex flex-col gap-4 mt-3">
       <hr />
-      <Button 
+      <Button
         outline
         label="Continue with Google"
         icon={FcGoogle}
-        onClick={() => {}}
+        onClick={() => { }}
       />
-      <Button 
+      <Button
         outline
         label="Continue with Github"
         icon={AiFillGithub}
         onClick={() => signIn('github')}
       />
-      <div 
+      <div
         className="
           text-neutral-500
           text-center
@@ -119,7 +120,7 @@ const RegisterModel = () => {
           font-light
         "
       >
-        <div 
+        <div
           className="
             flex 
             flex-row 
@@ -146,7 +147,7 @@ const RegisterModel = () => {
   )
 
   return (
-    <Model 
+    <Model
       disabled={isLoading}
       isOpen={registerModel.isOpen}
       title="Register"

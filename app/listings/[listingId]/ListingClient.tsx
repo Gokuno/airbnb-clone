@@ -1,30 +1,128 @@
 "use client";
 
-import { useMemo } from "react";
-import { Reservation } from "@prisma/client"
+import toast from "react-hot-toast";
+import axios from "axios";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { differenceInCalendarDays, eachDayOfInterval } from "date-fns";
 
-import { SafeListing, SafeUser } from "@/app/types"
+import { SafeListing, SafeReservation, SafeUser } from "@/app/types";
 import { categories } from "@/app/components/navbar/Categories";
 import Container from "@/app/components/Container";
 import ListingHead from "@/app/components/listings/ListingHead";
 import ListingInfo from "@/app/components/listings/ListingInfo";
+import useLoginModel from "@/app/components/hooks/useLoginModel";
+import ListingReservation from "@/app/components/listings/ListingReservation";
+import { Range } from 'react-date-range';
+
+const initialDateRange = {
+    startDate: new Date(),
+    endDate: new Date(),
+    key: 'selection'
+};
 
 interface ListingClientProps {
-    reservation?: Reservation
+    reservations?: SafeReservation[];
     listing: SafeListing & {
-        user: SafeUser
+        user: SafeUser;
     };
     currentUser?: SafeUser | null;
 }
 
 const ListingClient: React.FC<ListingClientProps> = ({
     listing,
+    reservations: initialReservations = [],
     currentUser
 }) => {
+    const loginModel = useLoginModel();
+    const router = useRouter();
+
+    const [reservations, setReservations] = useState<SafeReservation[]>(initialReservations);
+    const [isLoading, setIsLoading] = useState(false);
+    const [totalPrice, setTotalPrice] = useState(listing.price);
+    const [dateRange, setDateRange] = useState(initialDateRange);
+
+    const disabledDates = useMemo(() => {
+        let dates: Date[] = [];
+
+        reservations.forEach((reservation) => {
+            const range = eachDayOfInterval({
+                start: new Date(reservation.startDate),
+                end: new Date(reservation.endDate)
+            });
+
+            dates = [...dates, ...range];
+        });
+
+        return dates;
+    }, [reservations]);
+
+    const onChangeDate = (value: Range) => {
+        setDateRange({
+            startDate: value.startDate || new Date(),
+            endDate: value.endDate || new Date(),
+            key: value.key || 'selection',
+        });
+    };
+
+    const onCreateReservation = useCallback(() => {
+        if (!currentUser) {
+            return loginModel.onOpen();
+        }
+
+        setIsLoading(true);
+
+        axios.post('/api/reservations', {
+            totalPrice,
+            startDate: dateRange.startDate,
+            endDate: dateRange.endDate,
+            listingId: listing?.id
+        })
+            .then((response) => {
+                toast.success('Listing reserved');
+                setDateRange(initialDateRange);
+
+                // Update the reservations state with the new reservation
+                setReservations((prevReservations) => [
+                    ...prevReservations,
+                    response.data
+                ]);
+                router.push('/trips');
+            })
+            .catch(() => {
+                toast.error('Something went wrong');
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }, [
+        totalPrice,
+        dateRange,
+        listing?.id,
+        currentUser,
+        loginModel
+    ]);
+
+    useEffect(() => {
+        if (dateRange.startDate && dateRange.endDate) {
+            const dayCount = differenceInCalendarDays(
+                dateRange.endDate,
+                dateRange.startDate
+            );
+            if (dayCount && listing.price) {
+                setTotalPrice(dayCount * listing.price);
+            } else {
+                setTotalPrice(listing.price);
+            }
+        }
+    }, [dateRange, listing.price]);
+
     const category = useMemo(() => {
         return categories.find((item) =>
-            item.label === listing.category);
+            item.label === listing.category
+        );
     }, [listing.category]);
+
     return (
         <Container>
             <div className="max-w-screen-lg mx-auto">
@@ -54,11 +152,29 @@ const ListingClient: React.FC<ListingClientProps> = ({
                             bathroomCount={listing.bathroomCount}
                             locationValue={listing.locationValue}
                         />
+                        <div
+                            className="
+                              order-first
+                              mb-10
+                              md:order-last
+                              md:col-span-3
+                            "
+                        >
+                            <ListingReservation
+                                price={listing.price}
+                                totalPrice={totalPrice}
+                                onChangeDate={onChangeDate}
+                                dateRange={dateRange}
+                                onSubmit={onCreateReservation}
+                                disabled={isLoading}
+                                disabledDates={disabledDates}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
         </Container>
-    )
-}
+    );
+};
 
-export default ListingClient
+export default ListingClient;
