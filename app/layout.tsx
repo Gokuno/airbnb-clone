@@ -6,6 +6,7 @@ import Navbar from "./components/navbar/Navbar";
 import RegisterModel from "./components/models/RegisterModel";
 import LoginModel from "./components/models/LoginModel";
 import RentModel from "./components/models/RentModel";
+import SearchModel from "./components/models/SearchModel";
 
 import ToasterProvider from "./providers/ToasterProvider";
 
@@ -37,12 +38,13 @@ export default async function RootLayout({
     <html lang="en">
       <body className={font.className}>
         <ToasterProvider />
+        <SearchModel />
         <RentModel />
         <LoginModel />
         <RegisterModel />
         <Navbar currentUser={currentUser} />
         <div className="pb-20 pt-28">
-        {children}
+          {children}
         </div>
       </body>
     </html>
