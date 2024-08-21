@@ -100,7 +100,8 @@ const ListingClient: React.FC<ListingClientProps> = ({
         dateRange,
         listing?.id,
         currentUser,
-        loginModel
+        loginModel,
+        router
     ]);
 
     useEffect(() => {
