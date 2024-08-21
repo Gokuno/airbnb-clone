@@ -101,6 +101,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
         listing?.id,
         currentUser,
         loginModel,
+        router
     ]);
 
     useEffect(() => {
