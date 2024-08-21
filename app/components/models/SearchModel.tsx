@@ -1,11 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { formatISO } from "date-fns";
 import qs from "query-string";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState, Suspense } from "react";
 import { Range } from "react-date-range";
-import dynamic from "next/dynamic";
 
 import Model from "./Model";
 import Heading from "../Heading";
@@ -15,6 +15,11 @@ import Counter from "../inputs/Counter";
 
 import useSearchModel from "../hooks/useSearchModel";
 
+
+const DynamicSearchParamsWrapper = dynamic(() => import('./DynamicSearchParamsWrapper'), {
+    ssr: false
+});
+
 enum STEPS {
     LOCATION = 0,
     DATE = 1,
@@ -23,7 +28,6 @@ enum STEPS {
 
 const SearchModel = () => {
     const router = useRouter();
-    const params = useSearchParams();
     const searchModel = useSearchModel();
 
     const [location, setLocation] = useState<CountrySelectValue>();
@@ -36,6 +40,12 @@ const SearchModel = () => {
         endDate: new Date(),
         key: 'selection'
     });
+
+    const [currentQuery, setCurrentQuery] = useState<Record<string, unknown>>({});
+
+    const onParamsLoaded = (query: Record<string, unknown>) => {
+        setCurrentQuery(query);
+    };
 
     const Map = useMemo(() => dynamic(() => import('../Map'), {
         ssr: false,
@@ -52,12 +62,6 @@ const SearchModel = () => {
     const onSubmit = useCallback(async () => {
         if (step !== STEPS.INFO) {
             return onNext();
-        }
-
-        let currentQuery = {};
-
-        if (params) {
-            currentQuery = qs.parse(params.toString());
         }
 
         const updatedQuery: any = {
@@ -95,7 +99,7 @@ const SearchModel = () => {
         bathroomCount,
         dateRange,
         onNext,
-        params
+        currentQuery // Added currentQuery, removed params
     ]);
 
     const actionLabel = useMemo(() => {
@@ -178,17 +182,20 @@ const SearchModel = () => {
     }
 
     return (
-        <Model
-            isOpen={searchModel.isOpen}
-            onClose={searchModel.onClose}
-            onSubmit={onSubmit}
-            title="Filters"
-            actionLabel={actionLabel}
-            secondaryActionLabel={secondaryActionLabel}
-            secondaryAction={step === STEPS.LOCATION ? undefined : onBack}
-            body={bodyContent}
-        />
-    )
+        <Suspense fallback={<div>Loading...</div>}>
+            <DynamicSearchParamsWrapper onParamsLoaded={onParamsLoaded} />
+            <Model
+                isOpen={searchModel.isOpen}
+                onClose={searchModel.onClose}
+                onSubmit={onSubmit}
+                title="Filters"
+                actionLabel={actionLabel}
+                secondaryActionLabel={secondaryActionLabel}
+                secondaryAction={step === STEPS.LOCATION ? undefined : onBack}
+                body={bodyContent}
+            />
+        </Suspense>
+    );
 }
 
 export default SearchModel;
