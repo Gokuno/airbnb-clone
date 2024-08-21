@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import qs from "query-string";
+import { useEffect, useState } from "react";
 
 interface DynamicSearchParamsWrapperProps {
     onParamsLoaded: (query: Record<string, unknown>) => void;
@@ -9,13 +10,18 @@ interface DynamicSearchParamsWrapperProps {
 
 const DynamicSearchParamsWrapper: React.FC<DynamicSearchParamsWrapperProps> = ({ onParamsLoaded }) => {
     const params = useSearchParams();
+    const [query, setQuery] = useState<Record<string, unknown>>({});
 
-    let currentQuery = {};
-    if (params) {
-        currentQuery = qs.parse(params.toString());
-    }
+    useEffect(() => {
+        if (params) {
+            const parsedQuery = qs.parse(params.toString());
+            setQuery(parsedQuery);
+        }
+    }, [params]);
 
-    onParamsLoaded(currentQuery);
+    useEffect(() => {
+        onParamsLoaded(query);
+    }, [query, onParamsLoaded]);
 
     return null;
 };
